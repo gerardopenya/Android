@@ -1,0 +1,113 @@
+1.-Se crea un GoogleApiClient que utilizar la API deseada
+2.-Extender la actividad con ConnectionCallbacks
+3.-Extender la actividad con OnConnectionFailedListener
+4.-Despues de conectar el GoogleApiClient esperar al callback onConnected
+5.-Continuar con los requerimientos específicos de la API
+
+UNA APLICACIÓN DE MAPAS PROBABLEMENTE SOLO NECESITE POR EJEMPLO 
+ implementa el OnMapREadyCallBack
+
+EJEMPLO DE LA IMPLEMENTACIÓN PARA UNA APP QUE USA GOOGLE PLUS PARA LOGUEARSE
+
+public class MainActivity extends AppCompatActivity 
+implements View.OnClickListener
+, GoogleApiClient.ConnectionCallbacks
+, GoogleApiClient.OnConnectionFailedListener {
+private GoogleApiClient mGoogleApiClient;
+
+private GoogleApiClient buildApiClient() {
+   return new GoogleApiClient.Builder(this)
+           .addConnectionCallbacks(this)
+           .addOnConnectionFailedListener(this)
+           .addApi(Plus.API, Plus.PlusOptions.builder().build())
+           .addScope(new Scope(Scopes.PROFILE))
+           .build();
+}
+
+
+
+
+
+Durante el desarrollo se puede utilizar un certificado autofirmado. Al liberar a producción se deberá obtener un certificado de Google.
+
+obteniendo el SHA1 que google usa para identificar la aplicación 
+
+AL haber instalado Android Studio se crea la carpeta
+C:\Users\yourUsername\.android\
+
+Donde encontraremos el keystore de donde se leerá el certificado debug.keystore
+
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+
+Para registrar la version de produccion
+keytool -list -v -keystore D:/Workspaces/Android/keystore/Keystore2FindHome.jks -alias FindHome -storepass KeyStore072016@FindHome -keypass KeyAliasPasswrd@Jul2016
+
+
+OJO ESTO FUNCIONO DESDE EL BASH DE GIT QUE ES UNA AMBIENTE SIMULADO DE LINUX, AL INTENTARLO DESDE LA LINEA DE COMANDOS WINDOWS MARCO ERROR DE NO ENCONTRAR EL KEYSTORE basicamente por el path que seguramente no esta incluido.
+
+ESto deberá mostrar los datos del certificado entre los que se encuentra la llave SHA1
+------------------------------------------------------------
+Abrir la consola de developers.
+
+https://console.developers.google.com/project
+
+Aquí se debe generar un proyecto nuevo o utilizar uno existente.
+En seguida se debe indicar que el proyecto va a utilizar una API de sing in.
+-primero se ubican las APIs disponibles y en este caso la de Google+ 
+- se habilita el uso de la API 
+
+Solicitara la generación de credenciales.
+
+Mostrará una pantalla para agregar las credenciales donde en este caso se encuentra seleccionada la api que se está usando que es Google+ API
+
+Se indica en este caso que es una aplicación android  y que se va a acceder a información del usuario
+
+se hace click en el boton “what credentials do i need”
+Se mostrará la pantalla donde deberá ingresarse el SHA1 
+
+**El espacio para ingresar la ruta o paquete aplicación
+com.bibodesigns.loginwithgplus
+
+SE crea la credencial y se obtiene un ClientID
+
+SE busca la pantalla de CONSENT SCREEN para incluir el nombre del proyecto como lo verán los usuarios  y se salva
+
+
+
+
+SE CREA UN NUEVO PROYECTO EN ANDROID STUDIO
+
+Se crea una aplicación con una sola Actividad
+
+Se utiliza el mismo nombre que el especificado en la consola en los pasos anteriores **
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   package="com.bibodesigns.loginwithgplus">
+
+
+Se configura Build.gradle para utilizar las bibliotecas de servicios (Services libraries)
+https://developers.google.com/android/guides/setup
+com.google.android.gms:play-services-plus:8.4.0
+
+SE configura Android manifest para las bibliotecas de servicios (Services libraries)
+
+se integra en el manifiesto los permisos necesarios
+
+android.permission.INTERNET
+android.permission.GET_ACCOUNTS
+android.permission.USE_CREDENTIALS
+
+
+
+		
+	
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,87 @@
+Hice una prueba exitosa donde una app android sube archivos exitosamente a S3.
+Primero en la consola de AWS en Amazon Cognito se crea un Identity Pool dejando por default que cree los roles que deben incluir aquel para usuarios no autenticados.
+
+Ahí mismo se muestra el código que se puede ser utilizado en android donde es importante copiar el IDENTITY POOL ID
+
+Cambiando en la consola AWS a IAM se puede editar los roles recien creados en este caso el que en el nombre lleva el del pool que se creo mas la cadena  “Unauth” que es el que se le pueden agregar las polizas necesarias. EN este experimento se le agrego una poliza AmazonS3FullAccess. Eso fue todo lo necesario para que la aplicacion subiera archivos.
+Despues de que la app funciona asi hay que hacer los cambios necesarios para que solo usuarios autenticados puedan subir los archivos.
+
+Para poder leer los archivos desde la aplicacion web tuve que crear una poliza CORS y una mas para el bucket
+
+Set Up the AWS Mobile SDK for Android
+Se siguieron los pasos de esta liga
+http://docs.aws.amazon.com/mobile/sdkforandroid/developerguide/
+
+Se indican las dependencias a incluir en el proyecto
+
+http://docs.aws.amazon.com/mobile/sdkforandroid/developerguide/setup.html
+Step 1: Get the AWS Mobile SDK for Android
+If you are using Android Studio, add the aws-android-sdk-core and aws-android-sdk-cognito dependencies to your app/build.gradle file, along with the dependencies for the individual services that your project will use, as shown below.
+dependencies {
+    compile 'com.amazonaws:aws-android-sdk-core:2.+'
+    compile 'com.amazonaws:aws-android-sdk-cognito:2.+'
+    compile 'com.amazonaws:aws-android-sdk-s3:2.+'
+    compile 'com.amazonaws:aws-android-sdk-ddb:2.+'
+}
+
+
+Step 2: Set Permissions in Your Manifest
+<uses-permission android:name="android.permission.INTERNET" />
+Step 3: Get AWS Credentials
+To use AWS services in your mobile application, you must obtain AWS Credentials using Amazon Cognito Identity as your credential provider. Using a credentials provider allows your app to access AWS services without having to embed your private credentials in your application. This also allows you to set permissions to control which AWS services your users have access to.
+To get started with Amazon Cognito, you must create an identity pool. An identity pool is a store of user identity data specific to your account. Every identity pool has configurable IAM roles that allow you to specify which AWS services your application’s users can access. Typically, a developer will use one identity pool per application. For more information on identity pools, see the Amazon Cognito Developer Guide.
+To create an identity pool for your application:
+Log in to the Amazon Cognito Console and click Create new identity pool.
+Enter a name for your Identity Pool and check the checkbox to enable access to unauthenticated identities. Click Create Pool to create your identity pool.
+Click Allow to create the two default roles associated with your identity pool–one for unauthenticated users and one for authenticated users. These default roles provide your identity pool access to Cognito Sync and Mobile Analytics.
+The next page displays code that creates a credentials provider so you can easily integrate Cognito Identity with your Android application. You pass the credentials provider object to the constructor of the AWS client you are using. The credentials provider looks like this:
+CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+    getApplicationContext(),    /* get the context for the application */
+    "COGNITO_IDENTITY_POOL",    /* Identity Pool ID */
+    Regions.MY_REGION           /* Region for your identity pool--US_EAST_1 or EU_WEST_1*/
+);
+
+
+Primero creas el pool EN COGNITO y para dar accesoi a usuarios no autenticados se selecciona el check que se muestra en pantalla
+
+De ahi te pasas a la consola de IAM y entras a Roles donde se veran los dos que se auto generaran al haber creado el pool
+
+Seleccionas el que en el nombre tiene UNAUTH
+Despues de eso sigues con lo que dice la pagina :
+Click the Create Role Policy button, select Policy Generator, and then click the Select button.
+On the Edit Permissions page, enter the settings shown in the following image. The Amazon Resource Name (ARN) of an S3 bucket looks like arn:aws:s3:::examplebucket/* and is composed of the region in which the bucket is located and the name of the bucket. The settings shown below will give your identity pool full to access to all actions for the specified bucket.
+
+
+
+ANTES DE ESO EN LA CONSOLA DE AMAZON COGNITO EN EL MENU DEL IDENTITY POOL SE PUEDE AUTO GENERAR CODIGO DE EJEMPLO , DE AHI TOME 
+
+// Initialize the Amazon Cognito credentials provider
+CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+    getApplicationContext(),
+    "FGADSFASFDAS FDS SSD  SAF DS", // Identity Pool ID
+    Regions.US_EAST_1 // Region
+);
+
+http://docs.aws.amazon.com/mobile/sdkforandroid/developerguide/getting-started-store-retrieve-s3-transferutility.html
+http://docs.aws.amazon.com/mobile/sdkforandroid/developerguide/s3transferutility.html
+
+
+
+
+El nombre del bucket se especifica 
+http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html
+
+Amazon S3 supports both virtual-hosted–style and path-style URLs to access a bucket.
+In a virtual-hosted–style URL, the bucket name is part of the domain name in the URL. For example:  
+http://bucket.s3.amazonaws.com
+http://bucket.s3-aws-region.amazonaws.com.
+In a virtual-hosted–style URL, you can use either of these endpoints. If you make a request to thehttp://bucket.s3.amazonaws.com endpoint, the DNS has sufficient information to route your request directly to the region where your bucket resides.
+In a path-style URL, the bucket name is not part of the domain (unless you use a region-specific endpoint). For example:
+US East (N. Virginia) region endpoint, http://s3.amazonaws.com/bucket
+Region-specific endpoint, http://s3-aws-region.amazonaws.com/bucket
+In a path-style URL, the endpoint you use must match the region in which the bucket resides. For example, if your bucket is in the South America (Sao Paulo) region, you must use the http://s3-sa-east-1.amazonaws.com/bucket endpoint. If your bucket is in the US East (N. Virginia) region, you must use thehttp://s3.amazonaws.com/bucket endpoint.
+
+
+Getting Credentials
+
+http://docs.aws.amazon.com/cognito/latest/developerguide/getting-credentials.html
