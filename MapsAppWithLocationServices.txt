@@ -1,0 +1,440 @@
+Que estratgegia utilizar ?
+http://stackoverflow.com/questions/33022662/android-locationmanager-vs-google-play-services
+
+http://blog.teamtreehouse.com/beginners-guide-location-android
+http://stackoverflow.com/questions/22329489/how-to-implement-onconnectionfailed-and-ondisconnected-for-a-location-servic
+
+
+Para integrar y usar google api client
+https://developers.google.com/android/guides/api-client
+https://developers.google.com/android/guides/setup
+
+Mapa en web
+https://developers.google.com/maps/documentation/javascript/tutorial
+https://developers.google.com/maps/documentation/javascript/adding-a-google-map
+
+Integra vector data en mapas
+https://www.youtube.com/watch?v=gYchIupUvHk#t=472.835446
+
+
+https://www.youtube.com/watch?v=lvcGh2ZgHeA&index=146&list=WL
+http://stackoverflow.com/questions/6181704/good-way-of-getting-the-users-location-in-android?rq=1
+https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi
+https://github.com/mcharmas/Android-ReactiveLocation
+http://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps
+
+http://stackoverflow.com/questions/31235564/locationsettingsrequest-dialog-onactivityresult-skipped
+
+
+Aqui empieza una serie de diferentes capitulos que engloban  los pasos para crear la aplicaicion con las herramientas correctas
+https://developer.android.com/training/building-location.html
+
+https://developer.android.com/training/location/change-location-settings.html
+
+
+
+********************************************************************************
+********************************************************************************
+Es mejor seguir los pasos descritos en el curso de Udacity
+********************************************************************************
+********************************************************************************
+
+
+
+ https://www.youtube.com/watch?v=8QbT6GzbE0Q
+Steps for Location Services Application
+
+1.- Create a [GoogleApiClient] that uses the Location Services API
+2.- Extend your activity with the [GoogleApiClientConnectionCallbacks] calbacks
+3.- Extend your activity with the [GoogleApiClient.OnConnecionFailedListener] Listener in case the connection fails.
+4.- Extend your activity with the [LocationListener] listener for location updates.
+5.- After connecting the [GoogleApiClient], waith for the [onConnected] callback.
+6.- In this callback, you’ll set up [onLocationChanged] callback, and in this you can caputre your location information.
+
+ Despues de crear la instancia de GoogleApiClient en el OnCreate
+ se mandara llamar al OnStart que es donde se trata de hacer la conexion
+ Si tiene exito y obtiene conexion con los servicios se mandara llamra inmtediatamente a OnConnected
+ Si no puede conectarse se llamara a OnConectionFailed
+ Si ya estaba conectado y sucede algo se llamara al OnConectionSuspended
+
+ En onConnected  se debe crear un nuevo LocationRequest object con la configuracion de prioridad e intervalo  para entonces solicitar las actualizaciones a los Location Services
+
+ Cuando los Location SErvices observen un cambio en la informacion que se les ha solicitado
+ haran un callback al metodo OnLocationChanged con la nueva ubicacion
+
+
+
+
+
+Al desarrollar el proyecto base para rastreo de vehiculos tuve que reiniciar el proyecto y quedo llamado GPSServiceBasic tomado al pie de la letra de 
+https://www.youtube.com/watch?v=lvcGh2ZgHeA&index=146&list=WL
+
+Y quedando como primer commit de git esa version.
+
+Sin embargo en el curso de UDACITY se utiliza otro metodo que basicamente es el recomendado y se basa en utilizar Google Play Services.
+
+La diferencia esta explicada aqui  ( y la copio al final de este doc)
+http://stackoverflow.com/questions/33022662/android-locationmanager-vs-google-play-services
+
+Asi que como segundo commit de GPSServiceBasic quedara la version con Firebase integrado primeramente para continuar con la integracion de los servicios de Google Play.
+
+segun se explica en 
+http://blog.teamtreehouse.com/beginners-guide-location-android
+Pero como yo ya tenia un proyecto y no lo cree como en ese tutorial es necesario 
+
+El primer paso es agregar el api al proyecto en la consola de cloud plataform
+https://console.cloud.google.com/home/dashboard?project=gpsservice-3dde7
+
+Se selecciona el proyecto y se va al api manager Al seleccionar en la paerte superior “Enable Api” se tiene acceso a seleccionar la deseada que para este caso es la de Google Maps Android 
+
+
+En seguida fui a la consola de developers
+https://developers.google.com/android/
+Y seleccione el link de Develop  Maps
+En esa pantalla aparece el boton “Get a key” que proporciona el dialogo para seleccionar el proyecto y habilitar el uso de esa API. ME responde con el api Key que en este punto ya esta lista y se puede ver en el api manager 
+
+
+HASTA ESTE PUNTO TODO ESTO HA RESULTADO QUE ES PARA USAR MAPAS!... YO LO QUE QUIERO ES PODER USAR Google’s Location Services API
+
+Para evitar que faltara algo decidi generar mediante el wizard  
+File -> New  -> Google -> Google Maps Activity
+
+Una actividad y automaticamente creo tambien google_maps_api.xml que es donde va el key que acabamos de crear.
+Se puede seguir el camino de forma inversa primero creando la actividad para usar mapas y el mismo archivo google_maps_api.xml contendra las instrucciones y la liga ya lista para generar el key :|
+
+Desconozco en este momento si este proceso tambien afecto el archivo build.gradle y le agrego la siguiente dependencia
+
+compile 'com.google.android.gms:play-services:10.2.0'
+
+
+En este punto parece estar todo listo para que la aplicacion utilice tanto el Google Api Client como los mapas.
+
+public class MapsActivity extends FragmentActivity implements
+        GoogleApiClient.ConnectionCallbacks, 
+        GoogleApiClient.OnConnectionFailedListener {
+
+
+Es recomendable leer 
+http://stackoverflow.com/questions/33022662/android-locationmanager-vs-google-play-services
+
+http://blog.teamtreehouse.com/beginners-guide-location-android
+
+
+Y revisar la estructura de esta clase 
+https://github.com/treehouse/android-location-example/blob/master/app/src/main/java/teamtreehouse/com/iamhere/MapsActivity.java
+
+
+package teamtreehouse.com.iamhere;
+
+import android.content.IntentSender;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MapsActivity extends FragmentActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
+
+    public static final String TAG = MapsActivity.class.getSimpleName();
+
+    /*
+     * Define a request code to send to Google Play services
+     * This code is returned in Activity.onActivityResult
+     */
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        setUpMapIfNeeded();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
+                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setUpMapIfNeeded();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    /**
+     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
+     * installed) and the map has not already been instantiated.. This will ensure that we only ever
+     * call {@link #setUpMap()} once when {@link #mMap} is not null.
+     * <p/>
+     * If it isn't installed {@link SupportMapFragment} (and
+     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
+     * install/update the Google Play services APK on their device.
+     * <p/>
+     * A user can return to this FragmentActivity after following the prompt and correctly
+     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
+     * have been completely destroyed during this process (it is likely that it would only be
+     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
+     * method in {@link #onResume()} to guarantee that it will be called.
+     */
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+            // Check if we were successful in obtaining the map.
+            if (mMap != null) {
+                setUpMap();
+            }
+        }
+    }
+
+    /**
+     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
+     * just add a marker near Africa.
+     * <p/>
+     * This should only be called once and when we are sure that {@link #mMap} is not null.
+     */
+    private void setUpMap() {
+        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    private void handleNewLocation(Location location) {
+        Log.d(TAG, location.toString());
+
+        double currentLatitude = location.getLatitude();
+        double currentLongitude = location.getLongitude();
+
+        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(currentLatitude, currentLongitude)).title("Current Location"));
+        MarkerOptions options = new MarkerOptions()
+                .position(latLng)
+                .title("I am here!");
+        mMap.addMarker(options);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (location == null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+        else {
+            handleNewLocation(location);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        /*
+         * Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error.
+         */
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        handleNewLocation(location);
+    }
+}
+
+
+
+
+
+
+
+
+112down voteaccepted
+
+User Location on Android
+
+Getting the user’s location on Android is a little less straightforward than on iOS. To start the confusion, there are two totally different ways you can do it. The first is using Android APIs from android.location.LocationListener, and the second is using Google Play Services APIs com.google.android.gms.location.LocationListener. Let’s go through both of them.
+
+1 Android’s Location API
+2 The Android’s location APIs use three different providers to get location -
+    LocationManager.GPS_PROVIDER — This provider determines location using satellites. Depending on conditions, this provider may take a while to return a location fix.
+    LocationManager.NETWORK_PROVIDER — This provider determines location based on availability of cell tower and WiFi access points. Results are retrieved by means of a network lookup.
+    LocationManager.PASSIVE_PROVIDER — This provider will return locations generated by other providers. You passively receive location updates when other applications or services request them without actually requesting the locations yourself.
+
+The gist of it is that you get an object of LocationManager from the system, implement the LocationListener, and call the requestLocationUpdates on the LocationManager.
+
+Here’s a code snippet:
+
+
+LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE); // Define a listener that responds to location updates 
+LocationListener locationListener = new LocationListener() { 
+    public void onLocationChanged(Location location) { 
+        // Called when a new location is found by the network location provider. 
+        makeUseOfNewLocation(location); 
+    } 
+    
+    public void onStatusChanged(String provider, int status, Bundle extras) {} 
+    public void onProviderEnabled(String provider) {} 
+    public void onProviderDisabled(String provider) {} }; // Register the listener with the Location Manager to receive location updates 
+    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
+Google’s API Guide on Location Strategies explains the code pretty nicely. But they also mention that in most cases, you’ll get better battery performance, as well as more appropriate accuracy, by using the Google Location Services API instead. Now the confusion starts!
+1 Google’s Location Services API
+Google’s Location Services API is a part of the Google Play Services APK (here’s how to set it up) . They’re built on top of Android’s API. These APIs provide a “Fused Location Provider” instead of the providers mentioned above. This provider automatically chooses what underlying provider to use, based on accuracy, battery usage, etc. It is fast because you get location from a system-wide service that keeps updating it. And you can use more advanced features such as geofencing.
+To use the Google’s Location Services, your app needs to connect to the GooglePlayServicesClient. To connect to the client, your activity (or fragment, or so) needs to implement GooglePlayServicesClient.ConnectionCallbacks and GooglePlayServicesClient.OnConnectionFailedListener interfaces. Here’s a sample code:
+
+public class MyActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
+     LocationClient locationClient; 
+     @Override 
+     protected void onCreate(Bundle savedInstanceState) { 
+         super.onCreate(savedInstanceState); 
+         setContentView(R.layout.activity_my); 
+         locationClient = new LocationClient(this, this, this); 
+    }
+    
+    @Override public void onConnected(Bundle bundle) { 
+        Location location = locationClient.getLastLocation() ; 
+        Toast.makeText(this, "Connected to Google Play Services", Toast.LENGTH_SHORT).show(); 
+    } 
+    
+    @Override public void onDisconnected() { 
+        Toast.makeText(this, "Connected from Google Play Services.", Toast.LENGTH_SHORT).show(); 
+    } 
+    
+    @Override public void onConnectionFailed(ConnectionResult connectionResult) { 
+        // code to handle failed connection 
+        // this code can be found here — http://developer.android.com/training/location/retrieve-current.html 
+    }
+
+Why is locationClient.getLastLocation() null?
+
+The locationClient.getLastLocation() gets the last known location from the client. However, the Fused Location Provider will only maintain background location if at least one client is connected to it. Once the first client connects, it will immediately try to get a location. If your activity is the first client to connect and you call getLastLocation() right away in onConnected(), that might not be enough time for the first location to come in. This will result in location being null.
+To solve this issue, you have to wait (indeterminately) till the provider gets the location and then call getLastLocation(), which is impossible to know. Another (better) option is to implement the com.google.android.gms.location.LocationListener interface to receive periodic location updates (and switch it off once you get the first update).
+
+public class MyActivity extends Activity imimplements ConnectionCallbacks, OnConnectionFailedListener, LocationListener { 
+    // . . . . . . . . more stuff here 
+    LocationRequest locationRequest; 
+    LocationClient locationClient; 
+    @Override protected void onCreate(Bundle savedInstanceState) { 
+        // . . . . other initialization code 
+        locationClient = new LocationClient(this, this, this); 
+        locationRequest = new LocationRequest(); // Use high accuracy 
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // Set the update interval to 5 seconds 
+        locationRequest.setInterval(UPDATE_INTERVAL); // Set the fastest update interval to 1 second 
+        locationRequest.setFastestInterval(FASTEST_INTERVAL); } // . . . . . . . . other methods 
+        
+        @Override public void onConnected(Bundle bundle) { 
+            Location location = locationClient.getLastLocation(); 
+            if (location == null) locationClient.requestLocationUpdates(locationRequest, this); 
+            else Toast.makeText(getActivity(), "Location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show(); 
+        } 
+        
+        // . . . . . . . . other methods 
+        
+        @Override public void onLocationChanged(Location location) { 
+            locationClient.removeLocationUpdates(this); // Use the location here!!! 
+        }
+
+n this code, you’re checking if the client already has the last location (in onConnected). If not, you’re requesting for location updates, and switching off the requests (in onLocationChanged()callback) as soon as you get an update.
+Note that the locationClient.requestLocationUpdates(locationRequest, this); has to be inside the onConnected callback, or else you will get an IllegalStateException because you will be trying to request for locations without connected to the Google Play Services Client.
+User has disabled Location Services
+
+Many times, the user would have location services disabled (to save battery, or privacy reasons). In such a case, the code above will still request for location updates, but onLocationChanged will never get called. You can stop the requests by checking if the user has disabled the location services.
+If your app requires them to enable location services, you would want to show a message or a toast. Unfortunately, there is no way of checking if the user has disabled location services in Google’s Location Services API. For this, you will have to resort back to Android’s API.
+
+In your onCreate method:
+    
+    LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE); 
+    if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) { 
+        locationEnabled = false; 
+        Toast.makeText(getActivity(), "Enable location services for accurate data", Toast.LENGTH_SHORT).show(); 
+    } else locationEnabled = true;
+
+And use the locationEnabled flag in your onConnected method like this:
+
+if (location != null) { 
+    Toast.makeText(getActivity(), "Location: " + location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_SHORT).show(); 
+} else if (location == null && locationEnabled) { 
+    locationClient.requestLocationUpdates(locationRequest, this); 
+}
+
+thanks to Rahul Jiresal
+shareimprove this answer
+
+15down vote
+You should use the Google Play Services location api instead of LocationManager. According to the docs:
+The Google Play services location APIs are preferred over the Android framework location APIs (android.location) as a way of adding location awareness to your app. If you are currently using the Android framework location APIs, you are strongly encouraged to switch to the Google Play services location APIs as soon as possible.
+As to why to switch, Google says this:
+The Google Location Services API, part of Google Play Services, provides a more powerful, high-level framework that automatically handles location providers, user movement, and location accuracy. It also handles location update scheduling based on power consumption parameters you provide. In most cases, you'll get better battery performance, as well as more appropriate accuracy, by using the Location Services API.
+shareimprove this answer
+
+
+
+
+****************************************************************************************************************
+
+http://stackoverflow.com/questions/6181704/good-way-of-getting-the-users-location-in-android?rq=1
+
+
+
+

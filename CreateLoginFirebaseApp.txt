@@ -1,0 +1,346 @@
+Se agrega lo necesario para poder utilizar firebase en la aplicación 
+Referencias:
+https://github.com/firebase/FirebaseUI-Android
+https://cloud.google.com/solutions/mobile/firebase-app-engine-android-studio
+https://www.firebase.com/docs/android/guide/login/google.html
+https://developers.google.com/identity/sign-in/android/start-integrating#get-config
+
+
+0.0 Indicaciones tomadas del curso de 
+Firebase Essentials For Android: 
+Lesson 3 create user accounts 
+Configuring google login
+
+Let's walk through how to set up Google login. To incorporate Google login, you'll do two things. First is to make a configuration file for your project (this involves making a "Google App" and passing along a Android Sigining Certificate). Then you will go into the Firebase backend and give it the Client ID for you new Google application.
+Generate the google-services.json Configuration File
+Follow the first half of the instructions on the Google Developer webpage to get a google-services configuration file. You will need to:
+Ensure you have all the prerequisites listed.
+Create a configuration file :
+Create an app on Google.
+Add an Android Signing Certificate SHA-1 so that you can use Google Sign-In.
+Download the google-services.json configuration file.
+Add the configuration file to your project.
+After you are done adding the configuration file, you do NOT need to complete the other steps on the Google Developer webpage (https://developers.google.com/identity/sign-in/android/start-integrating). 
+Just stop at “Add the Google Services plugin”
+
+You can move to the next section, "Add the Client ID to Firebase" now.
+Add the Client ID to Firebase
+Next, as described in the Firebase Google login documentation (https://www.firebase.com/docs/android/guide/login/google.html),  head on over to the Login & Auth section in your App Dashboard (IN FIREBASE DASHBOARD AT THE DATABASE DEFINED TO THIS PROJECT). Enable Google authentication and then copy your Google application Client ID into the Firebase.
+
+
+1.- Se debe crear un proyecto en Google Cloud Platform en la consola de developers
+https://console.developers.google.com/project
+
+
+Seleccionar API MANAGER -- credentials 
+
+Crear una API KEY para android donde se especificara el
+package name que es el paquete que se indica en el manifest.xml del proyecto android
+
+y se especifica tambien el SHA-1 certificate fingerprint  cuya forma de extraerse, al menos la de desarrollo, es con el comando
+
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+como se especifica en el documento de  “Notas desarrollo apps con servicios Google”
+o en la pagina https://developers.google.com/android/guides/client-auth
+
+
+
+
+
+
+
+2- se crea el proyecto en firebase
+
+
+
+
+
+2.1.-Como se especifica en 
+https://www.firebase.com/docs/android/guide/login/google.html
+
+Make sure your application also has it's Product Name set on the 
+APIs & auth → Consent Screen 
+or Google will return a INVALID_CLIENT_ID error when authenticating.
+2.2 After configuring your Google application, head on over to the Login & Auth section in your App Dashboard (THIS IS IN THE FIREBASE DASHBOARD) . Enable Google authentication and then copy your Google application Client ID into the appropriate input. You can find your Google application's client ID from the same 
+APIs & auth →Credentials 
+page you were just on. You can leave the client secret field blank.
+
+NOTA  En el caso de usar google el google client ID parece ser el nombre de la app en la consola de google developers  android:com.bibodesigns.experimentosuberslave0
+En la ventana de CREDENTIALS dentro del API MANAGER se lee claramente 
+CLIENT ID al seleccionar una de las credenciales creadas si estas fueron creadas como 
+OAuth 2.0 client IDs
+
+
+
+3.-se procede a generar el archivo 
+google-services.json
+COMO SE INDICA EN en el ejemplo construido en https://github.com/firebase/FirebaseUI-Android :
+If you're using Google authentication, place your google-services.json in the app folder.
+
+en la pagina 
+https://developers.google.com/cloud-messaging/android/client
+
+SE HABLA DE los métodos de Set up a  Google Cloud Messaging (GCM) Client App on Android 
+
+Que tiene un botón que deberá llevarnos a 
+https://developers.google.com/mobile/add?platform=android&cntapi=gcm&cnturl=https:%2F%2Fdevelopers.google.com%2Fcloud-messaging%2Fandroid%2Fclient&cntlbl=Continue%20Adding%20GCM%20Support&%3Fconfigured%3Dtrue
+
+a)Se selecciona la aplicacion de google asi como el paquete de la aplicación android 
+b) se indica el tipo de servicios que se asignaran a esta app (en este caso google sign-in) y en esta pantalla se debe ingresar el SHA1
+
+Es entonces cuando con un boton se habilitan lso servicios seleccionados y el archivo puede ser generado.  En seguida se agrega el archivo a la aplicación
+Add the configuration file to your project
+Copy the google-services.json file you just downloaded into the app/ or mobile/directory of your Android Studio project
+
+4.- se crea o modifica el archivo gradle.properties agregando las constantes a utilizar indicando el proyecto en firebase
+
+UniqueFirebaseRootUrl="https://experimentos-fb.firebaseio.com/"
+UniqueFirebaseVehiclesDB="vehiculos"
+
+4.1 -En build.gradle 
+
+// bloque necesrio para firebase inicia
+buildTypes.each {
+   it.buildConfigField 'String', 'UNIQUE_FIREBASE_ROOT_URL', UniqueFirebaseRootUrl
+   it.buildConfigField 'String', 'UNIQUE_FIREBASE_VEHICULOS_DB', UniqueFirebaseVehiclesDB
+}
+
+//Necesario incluir este bloque pues puede aparecer un error de duplicado de archivos al incluir firebase
+packagingOptions {
+   exclude 'META-INF/LICENSE'
+   exclude 'META-INF/LICENSE-FIREBASE.txt'
+   exclude 'META-INF/NOTICE'
+}
+
+//bloque necesario para firebase fin... falta la dependencia
+.
+.
+.
+
+compile 'com.google.android.gms:play-services-auth:8.4.0' //If you're using Google authentication, place your google-services.json in the app folder.
+
+compile 'com.firebase:firebase-client-android:2.5.2+'      
+//base de datos firebase ultima version obtenida en  http://mvnrepository.com/artifact/com.firebase/firebase-client-android/2.5.2
+compile 'com.firebaseui:firebase-ui:0.3.1'          
+// firebase UI    ultima version obtenida en http://mvnrepository.com/artifact/com.firebaseui/firebase-ui/0.3.1
+
+si se usa login de fasebook o twitter 
+// firebaseUI to autenticate
+   compile 'com.facebook.android:facebook-android-sdk:4.6.0'
+   compile 'org.twitter4j:twitter4j-core:4.0.2'
+
+
+
+4.2.- se agrega a la clase de constantes aquellas a utilizr en el proyecto
+
+public final class Constants {
+   public static final String FIREBASE_URL = BuildConfig.UNIQUE_FIREBASE_ROOT_URL;
+   public static final String FIREBASE_VEHICULOS = BuildConfig.UNIQUE_FIREBASE_VEHICULOS_DB;
+
+}
+
+
+4.3 Se agrega la clase para ayuda de inicialización del contexto (crear el archivo de aplicacion)
+public class RootApplicaton extends android.app.Application {
+
+   @Override
+   public void onCreate() {
+       super.onCreate();
+       Firebase.setAndroidContext(this);
+   }
+}
+y se indica en el manifiesto( se enlaza )
+<application
+   android:name=".RootApplicaton"
+
+
+
+
+
+Se crea una actividad en el proyecto android que extienda FirebaseLoginBaseActivity
+
+Esta acttividad como se explica en https://github.com/firebase/FirebaseUI-Android debera implementar algunos metodos que se encargaran de mostrar la ventana para logueo. 
+
+
+public class MainActivity extends FirebaseLoginBaseActivity {
+
+   private static final String LOG_TAG = MainActivity.class.getCanonicalName();
+
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_main);
+       Log.d(LOG_TAG, " onCreate(Bundle savedInstanceState) )");
+
+   }
+
+
+   @Override
+   protected void onStart() {
+       super.onStart();
+       Log.d(LOG_TAG, " onStart()");
+
+       // All providers are optional! Remove any you don't want.
+       //setEnabledAuthProvider(AuthProviderType.FACEBOOK);
+       //setEnabledAuthProvider(AuthProviderType.TWITTER);
+       setEnabledAuthProvider(AuthProviderType.GOOGLE);
+       setEnabledAuthProvider(AuthProviderType.PASSWORD);
+
+   }
+
+   @Override
+   protected void onPause() {
+       super.onPause();
+   }
+
+   @Override
+   protected void onResume() {
+       super.onResume();
+       Log.d(LOG_TAG, " onResume()");
+   }
+
+
+
+   //FirebaseLoginBaseActivity
+   @Override
+   protected Firebase getFirebaseRef() {
+       Log.d(LOG_TAG, "getFirebaseRef");
+       return new Firebase(Constants.FIREBASE_URL);
+   }
+
+   @Override
+   protected void onFirebaseLoginProviderError(FirebaseLoginError firebaseLoginError) {
+       Log.d(LOG_TAG, "onFirebaseLoginProviderError(FirebaseLoginError firebaseLoginError) " + firebaseLoginError);
+       Toast.makeText(MainActivity.this, "onFirebaseLoginProviderError-> " + firebaseLoginError.toString(), Toast.LENGTH_LONG).show();
+
+   }
+
+   @Override
+   protected void onFirebaseLoginUserError(FirebaseLoginError firebaseLoginError) {
+       Log.d(LOG_TAG, "onFirebaseLoginUserError(FirebaseLoginError firebaseLoginError) " + firebaseLoginError);
+       Toast.makeText(MainActivity.this, "onFirebaseLoginUserError -> " + firebaseLoginError.toString(), Toast.LENGTH_LONG).show();
+
+      if( firebaseLoginError.error.name().equals("MISC_PROVIDER_ERROR")){
+          Intent intent = new Intent(this,CreateUser.class);
+          startActivity(intent);
+       }
+
+   }
+
+   //In addition you can override these methods to customize what happens when a user logs in or out:
+
+   @Override
+   public void onFirebaseLoggedIn(AuthData authData) {
+       // TODO: Handle successful login
+       //*If you want to know the current AuthData at any point, you can call getAuth().
+       // This will return the AuthData for the currently authenticated user, or null if no user is authenticated.
+
+       Log.d(LOG_TAG, "onFirebaseLoggedIn(AuthData authData) " + authData);
+       Intent intent =` new Intent(this,MapsActivity.class);
+       startActivity(intent);
+       finish();
+
+   }
+
+   @Override
+   public void onFirebaseLoggedOut() {
+       // TODO: Handle logout
+       Log.d(LOG_TAG, "onFirebaseLoggedOut() ");
+
+   }
+
+   public void startOrLoging(View view) {
+       if(getAuth()==null) {
+           showFirebaseLoginPrompt();
+       }
+   }
+
+   public void logOutAndFinish(View view) {
+       logout();
+
+   }
+
+   public void logIn(View view) {
+       showFirebaseLoginPrompt();
+   }
+}
+
+
+
+
+
+Con su respectivo layout .
+
+Otra actividad puede encargarse del caso de uso donde en caso de no querer loguearse con cuenta de google el usuario puede crear una cuenta en el sistema, esto es aprovechando la api de firebase, tambien con su layout correspondiente
+
+package com.bibodesigns.experimentosuberslave0;
+import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import org.w3c.dom.Text;
+import java.util.Map;
+
+public class CreateUser extends AppCompatActivity {
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_create_user);
+   }
+
+   @Override
+   protected void onStart() {
+       super.onStart();
+   }
+
+
+
+
+   public void creaUsuario(View view) {
+
+       final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+       final TextView tvEmail =(TextView) findViewById(R.id.tvEmailCreateUser);
+
+       ref.createUser(tvEmail.getText().toString(), "password", new Firebase.ValueResultHandler<Map<String, Object>>() {  // ojo   compile 'com.firebase:firebase-client-android:2.5.2+'      //base de datos firebase
+           @Override
+           public void onSuccess(Map<String, Object> result) {
+               System.out.println("Successfully created user account with uid: " + result.get("uid"));
+               Toast.makeText(CreateUser.this, "El usuario ha sido creado", Toast.LENGTH_SHORT).show();
+
+
+               ref.resetPassword(tvEmail.getText().toString(), new Firebase.ResultHandler() {
+                   @Override
+                   public void onSuccess() {
+                       Toast.makeText(CreateUser.this, "Se ha enviado el password a la cuenta de correo electronico", Toast.LENGTH_SHORT).show();
+                   }
+
+                   @Override
+                   public void onError(FirebaseError firebaseError) {
+                       Toast.makeText(CreateUser.this, "Error al crear eel usuario", Toast.LENGTH_SHORT).show();
+                       Toast.makeText(CreateUser.this, firebaseError.toString(), Toast.LENGTH_SHORT).show();
+                   }
+               });
+
+           }
+
+           @Override
+           public void onError(FirebaseError firebaseError) {
+               Toast.makeText(CreateUser.this, "Error al crear eel usuario", Toast.LENGTH_SHORT).show();
+               Toast.makeText(CreateUser.this, firebaseError.toString(), Toast.LENGTH_SHORT).show();
+           }
+       });
+
+
+   }
+}
+
+
+
