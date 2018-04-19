@@ -4,6 +4,19 @@
 4.-Despues de conectar el GoogleApiClient esperar al callback onConnected
 5.-Continuar con los requerimientos específicos de la API
 
+
+ https://www.youtube.com/watch?v=8QbT6GzbE0Q
+Steps for Location Services Application
+
+1.- Create a [GoogleApiClient] that uses the Location Services API
+2.- Extend your activity with the [GoogleApiClientConnectionCallbacks] calbacks
+3.- Extend your activity with the [GoogleApiClient.OnConnecionFailedListener] Listener in case the connection fails.
+4.- Extend your activity with the [LocationListener] listener for location updates.
+5.- After connecting the [GoogleApiClient], waith for the [onConnected] callback.
+6.- In this callback, you’ll set up [onLocationChanged] callback, and in this you can caputre your location information.
+
+
+
 UNA APLICACIÓN DE MAPAS PROBABLEMENTE SOLO NECESITE POR EJEMPLO 
  implementa el OnMapREadyCallBack
 
